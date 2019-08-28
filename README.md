@@ -8,7 +8,7 @@ A basic poc of
 
 working in virtual box running in local system.
 
-# Steps
+# Setup
 
 1.  Install virtual box in your system first 
 
@@ -34,7 +34,7 @@ working in virtual box running in local system.
 
 4.  Start minikube
 
-        minikube start
+        minikube start --memory=16384 --cpus=4 --kubernetes-version=v1.15.0
 
 5.  some basic commands
 
@@ -60,4 +60,45 @@ working in virtual box running in local system.
         to get dashboard url 
 
                 minikube dashboard --url
+
+
+    To verify memory usage of minikube 
+
+            minikube ssh
+            top
+
+    If we want minikube to provide a load balancer 
+
+            sudo minikube tunnel 
+
+    sometimes minikube does not properly clean tunnel 
+
+        sudo minikube tunnel --cleanup
+
+7.  Installing Istio
+
+        follow the docs and after downloading the binaries move it under /usr/local/bin
+
+8.  Install a heml client
+
+        Download the desired version from git 
+        unpack it tar -zxvf helm-v2.0.0-linux-amd64.tgz
+        move helm binary from /linux-amd64/helm /usr/local/bin/helm
+
+9.  Installing tiller
+
+            heml init
+
+        it will connect to kubernates current context cluster and will install tiller there .
+
+        verify the tiller installation
+             kubectl get pods -n kube-system
+
+        https://github.com/helm/helm/blob/master/docs/install.md
+
+# Configuration
+
+run this command to use helm and tiller for further operations
+
+    helm repo add istio.io https://storage.googleapis.com/istio-release/releases/1.2.2/charts/
 
