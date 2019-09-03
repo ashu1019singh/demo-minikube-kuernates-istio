@@ -40,7 +40,7 @@ working in virtual box running in local system.
 
         to check the cluster info
         
-                kubectl ccluster-info
+                kubectl cluster-info
         
         minikube config file can be found under
                 ~/.minikube/machines/minikube/config.json
@@ -77,7 +77,56 @@ working in virtual box running in local system.
 
 7.  Installing Istio
 
+        https://istio.io/docs/setup/kubernetes/#downloading-the-release
+
         follow the docs and after downloading the binaries move it under /usr/local/bin
+
+
+###  Now in order to check the deployment we can use helm and tiller based configuration or without them ..
+
+### first we will see without them , so installation of helm and tiller will be done later
+
+8. Deploying microservices and testing 
+
+        https://istio.io/docs/examples/bookinfo/
+
+
+        https://kubernetes.io/docs/tasks/administer-cluster/namespaces/
+        
+
+        check all the namespaces
+                kubectl get namespace
+        to create a namespace
+                kubectl create namespace XYZ
+        to delete 
+                kubectl delete namespace XYZ
+        to get labels
+                kubectl get namespaces --show-labels
+
+        label the namespace that will host application with istio-injection=enabled
+                kubectl label namespace default istio-injection=enabled
+        
+        Deploy your application using the kubectl command
+                kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml
+
+        Confirm all services and pods are correctly defined and running:
+                kubectl get services
+                kubectl get pods
+        
+        To confirm that the Bookinfo application is running, send a request to it by a curl command from some pod, for example from ratings
+                kubectl exec -it $(kubectl get pod -l app=ratings -o jsonpath='{.items[0].metadata.name}') -c ratings -- curl productpage:9080/productpage | grep -o "<title>.*</title>"
+        
+        you will get the output 
+                <title>Simple Bookstore App</title>
+
+        Now that application is up and working , we need an ingress controller to make it accessible from outside cluster from browser
+        An Istio-Gateway is used for this.
+
+        
+
+---
+
+
 
 8.  Install a heml client
 
