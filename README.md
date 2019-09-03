@@ -126,7 +126,7 @@ Installation steps Istio in kubernates cluster:
                 kubectl label namespace demo istio-injection=enabled
         
         Deploy your application using the kubectl command
-                kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml
+                kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml -n demo
 
         Confirm all services and pods are correctly defined and running:
                 kubectl get services
