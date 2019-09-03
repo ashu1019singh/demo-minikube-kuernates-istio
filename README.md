@@ -86,6 +86,25 @@ working in virtual box running in local system.
 
 ### first we will see without them , so installation of helm and tiller will be done later
 
+Installation steps Istio in kubernates cluster:
+
+        go to instio installation directory and install all istio crds (custom resource definitions )
+        
+        for i in install/kubernetes/helm/istio-init/files/crd*yaml; do kubectl apply -f $i; done
+
+        for now we will install permissive profile to support both new and old deployments:
+
+        kubectl apply -f install/kubernetes/istio-demo.yaml
+
+        verify the installation
+
+        kubectl get svc -n istio-system
+        kubectl get pods -n istio-system
+
+                3 will show as completed rest as running
+        
+
+
 8. Deploying microservices and testing 
 
         https://istio.io/docs/examples/bookinfo/
@@ -104,7 +123,7 @@ working in virtual box running in local system.
                 kubectl get namespaces --show-labels
 
         label the namespace that will host application with istio-injection=enabled
-                kubectl label namespace default istio-injection=enabled
+                kubectl label namespace demo istio-injection=enabled
         
         Deploy your application using the kubectl command
                 kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml
@@ -122,7 +141,7 @@ working in virtual box running in local system.
         Now that application is up and working , we need an ingress controller to make it accessible from outside cluster from browser
         An Istio-Gateway is used for this.
 
-        
+
 
 ---
 
