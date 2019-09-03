@@ -134,11 +134,32 @@ Installation steps Istio in kubernates cluster:
         
         To confirm that the Bookinfo application is running, send a request to it by a curl command from some pod, for example from ratings
                 kubectl exec -it $(kubectl get pod -l app=ratings -o jsonpath='{.items[0].metadata.name}') -c ratings -- curl productpage:9080/productpage | grep -o "<title>.*</title>"
+
+        for a specific namespace 
+
+        kubectl -n demo exec -it $(kubectl get pod -n demo -l app=ratings -o jsonpath='{.items[0].metadata.name}') -c ratings -- curl productpage:9080/productpage | grep -o "<title>.*</title>"
         
         you will get the output 
                 <title>Simple Bookstore App</title>
 
-        Now that application is up and working , we need an ingress controller to make it accessible from outside cluster from browser
+
+9.  Now we will verify istio installation by several istio tasks
+
+        collecting logs:
+        
+        Apply a YAML file with configuration for the new log stream that Istio will generate and collect automatically.
+
+        kubectl apply -f samples/bookinfo/telemetry/log-entry.yaml
+
+        Send traffic to the sample application.
+
+        kubectl -n demo exec -it $(kubectl get pod -n demo -l app=ratings -o jsonpath='{.items[0].metadata.name}') -c ratings -- curl productpage:9080/productpage | grep -o "<title>.*</title>"
+
+        Verify that the log stream has been created and is being populated for requests.
+
+        kubectl logs -n istio-system -l istio-mixer-type=telemetry -c mixer | grep "newlog"
+
+Now that application is up and working , we need an ingress controller to make it accessible from outside cluster from browser
         An Istio-Gateway is used for this.
 
 
