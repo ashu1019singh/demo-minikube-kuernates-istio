@@ -10,11 +10,11 @@ working in virtual box running in local system.
 
 # Setup
 
-1.  Install virtual box in your system first 
+1. Install virtual box in your system first 
 
         sudo apt install virtualbox virtualbox-ext-pack
 
-2.  Download minikube
+2. Download minikube
 
         wget https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
 
@@ -82,107 +82,142 @@ working in virtual box running in local system.
         follow the docs and after downloading the binaries move it under /usr/local/bin
 
 
-###  Now in order to check the deployment we can use helm and tiller based configuration or without them ..
+    Now in order to check the deployment we can use helm and tiller based configuration or without them ..
 
-### first we will see without them , so installation of helm and tiller will be done later
+    first we will see without them , so installation of helm and tiller will be done later
+  
+    Installation steps Istio in kubernates cluster:
 
-Installation steps Istio in kubernates cluster:
+    1. go to instio installation directory and install all istio crds (custom resource definitions )
 
-        go to instio installation directory and install all istio crds (custom resource definitions )
         
-        for i in install/kubernetes/helm/istio-init/files/crd*yaml; do kubectl apply -f $i; done
+			for i in install/kubernetes/helm/istio-init/files/crd*yaml; do kubectl apply -f $i; done
 
-        for now we will install permissive profile to support both new and old deployments:
+    2. for now we will install permissive profile to support both new and old deployments:
 
-        kubectl apply -f install/kubernetes/istio-demo.yaml
+        	kubectl apply -f install/kubernetes/istio-demo.yaml
 
-        verify the installation
+    3. verify the installation
 
-        kubectl get svc -n istio-system
-        kubectl get pods -n istio-system
+    		kubectl get svc -n istio-system
+        	kubectl get pods -n istio-system
 
-                3 will show as completed rest as running
+    	note only 3 pods will show as completed, rest as running
         
 
 
 8. Deploying microservices and testing 
 
-        https://istio.io/docs/examples/bookinfo/
+    https://istio.io/docs/examples/bookinfo/
 
-
-        https://kubernetes.io/docs/tasks/administer-cluster/namespaces/
+    https://kubernetes.io/docs/tasks/administer-cluster/namespaces/
         
-
-        check all the namespaces
-                kubectl get namespace
-        to create a namespace
-                kubectl create namespace XYZ
-        to delete 
-                kubectl delete namespace XYZ
-        to get labels
-                kubectl get namespaces --show-labels
-
-        label the namespace that will host application with istio-injection=enabled
-                kubectl label namespace demo istio-injection=enabled
+    check all the namespaces
         
-        Deploy your application using the kubectl command
-                kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml -n demo
+		kubectl get namespace
+    to create a namespace
+    
+	    kubectl create namespace XYZ
+	to delete 
+	
+		kubectl delete namespace XYZ
+	to get labels
+		
+		kubectl get namespaces --show-labels
 
-        Confirm all services and pods are correctly defined and running:
-                kubectl get services
-                kubectl get pods
+	label the namespace that will host application with istio-injection=enabled
+	
+		kubectl label namespace demo istio-injection=enabled
+    ---    
+
+	Deploy your application using the kubectl command
+       
+	   kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml -n demo
+
+	Confirm all services and pods are correctly defined and running:
+	   
+	   kubectl get services
+       kubectl get pods
         
-        To confirm that the Bookinfo application is running, send a request to it by a curl command from some pod, for example from ratings
-                kubectl exec -it $(kubectl get pod -l app=ratings -o jsonpath='{.items[0].metadata.name}') -c ratings -- curl productpage:9080/productpage | grep -o "<title>.*</title>"
+	To confirm that the Bookinfo application is running, send a request to it by a curl command from some pod, for example from ratings
+		
+	   kubectl exec -it $(kubectl get pod -l app=ratings -o jsonpath='{.items[0].metadata.name}') -c ratings -- curl productpage:9080/productpage | grep -o "<title>.*</title>"
 
-        for a specific namespace 
+	for a specific namespace 
 
-        kubectl -n demo exec -it $(kubectl get pod -n demo -l app=ratings -o jsonpath='{.items[0].metadata.name}') -c ratings -- curl productpage:9080/productpage | grep -o "<title>.*</title>"
+       kubectl -n demo exec -it $(kubectl get pod -n demo -l app=ratings -o jsonpath='{.items[0].metadata.name}') -c ratings -- curl productpage:9080/productpage | grep -o "<title>.*</title>"
         
-        you will get the output 
-                <title>Simple Bookstore App</title>
+	you will get the output 
+		
+		<title>Simple Bookstore App</title>
 
-        Note :
+	Note :
         minikube doesnot support the external load balancer , to access the services from outside we need to use nodeport in services of bookinfo.yaml
-
 
 9.  Now we will verify istio installation by several istio tasks
 
-        collecting logs:
+	1. collecting logs:
         
-        Apply a YAML file with configuration for the new log stream that Istio will generate and collect automatically.
+		Apply a YAML file with configuration for the new log stream that Istio will generate and collect automatically.
 
-        kubectl apply -f samples/bookinfo/telemetry/log-entry.yaml
+           kubectl apply -f samples/bookinfo/telemetry/log-entry.yaml
 
         Send traffic to the sample application.
 
         from pod:
-        kubectl -n demo exec -it $(kubectl get pod -n demo -l app=ratings -o jsonpath='{.items[0].metadata.name}') -c ratings -- curl productpage:9080/productpage | grep -o "<title>.*</title>"
+        
+		   kubectl -n demo exec -it $(kubectl get pod -n demo -l app=ratings -o jsonpath='{.items[0].metadata.name}') -c ratings -- curl productpage:9080/productpage | grep -o "<title>.*</title>"
 
         from browser:
-        minikube-ip:nodeport/productpage
-        
+
+           minikube-ip:nodeport/productpage
+
         Verify that the log stream has been created and is being populated for requests.
 
-        kubectl logs -n istio-system -l istio-mixer-type=telemetry -c mixer | grep "newlog"
+           kubectl logs -n istio-system -l istio-mixer-type=telemetry -c mixer | grep "newlog"
 
+	2. Querying the Metrics from Prometheus
+        
+        
+		Verify that the prometheus service is running in your cluster
+         
+        	kubectl -n istio-system get svc prometheus
 
-Now that application is up and working , we need an ingress controller to make it accessible from outside cluster from browser
-        An Istio-Gateway is used for this.
+		Make any request to productpage api
+  
+        	minikube-ip:nodport/productpage
+
+        Open the Prometheus UI by port-forwarding
+
+        	kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=prometheus -o jsonpath='{.items[0].metadata.name}') 9090:9090
+
+        Visit http://localhost:9090/graph in your web browser
+
+        Execute a Prometheus query.<br>
+        
+		In the “Expression” input box at the top of the web page, enter the text:  istio_requests_total<br>
+		
+		Then, click the Execute button.
+
+        wait for some time you ll get the metrices.
+
+	3. Note that routing is not working as of now in minikube as it does not have a external load balancer , i need to test it on aws VM.
+	<br>Now that application is up and working , we need an ingress controller to make it accessible from outside cluster from browser
+	<br>
+	An Istio-Gateway is used for this.
 
 
 
 ---
+# Things to do:
 
-
-
-8.  Install a heml client
+Install a heml client
 
         Download the desired version from git 
         unpack it tar -zxvf helm-v2.0.0-linux-amd64.tgz
         move helm binary from /linux-amd64/helm /usr/local/bin/helm
 
-9.  Installing tiller
+Installing tiller
 
             heml init
 
