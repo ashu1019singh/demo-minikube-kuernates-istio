@@ -142,6 +142,9 @@ Installation steps Istio in kubernates cluster:
         you will get the output 
                 <title>Simple Bookstore App</title>
 
+        Note :
+        minikube doesnot support the external load balancer , to access the services from outside we need to use nodeport in services of bookinfo.yaml
+
 
 9.  Now we will verify istio installation by several istio tasks
 
@@ -153,11 +156,16 @@ Installation steps Istio in kubernates cluster:
 
         Send traffic to the sample application.
 
+        from pod:
         kubectl -n demo exec -it $(kubectl get pod -n demo -l app=ratings -o jsonpath='{.items[0].metadata.name}') -c ratings -- curl productpage:9080/productpage | grep -o "<title>.*</title>"
 
+        from browser:
+        minikube-ip:nodeport/productpage
+        
         Verify that the log stream has been created and is being populated for requests.
 
         kubectl logs -n istio-system -l istio-mixer-type=telemetry -c mixer | grep "newlog"
+
 
 Now that application is up and working , we need an ingress controller to make it accessible from outside cluster from browser
         An Istio-Gateway is used for this.
