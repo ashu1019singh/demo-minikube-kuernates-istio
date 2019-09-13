@@ -1,0 +1,37 @@
+version: "2.1"
+services:
+  app-1:
+    image: app-1-image
+    container_name: app-1-container
+    build: ./app-1-for-k8s-testing
+    restart: always
+    hostname: localhost
+    network_mode: host
+    ports:
+      - 8090:8090
+    healthcheck:
+      test: "exit 0"
+
+  app-2:
+    image: app-2-image
+    container_name: app-2-container
+    build: ./app-2-for-k8s-testing
+    restart: always
+    hostname: localhost
+    network_mode: host
+    ports:
+      - 8092:8092
+    healthcheck:
+      test: "exit 0"
+
+  app-3:
+    image: app-3-image
+    container_name: app-3-container
+    build: ./app-3-for-k8s-testing
+    restart: always
+    hostname: localhost
+    network_mode: host
+    ports:
+      - 8092:8092
+    healthcheck:
+      test: "exit 0"
